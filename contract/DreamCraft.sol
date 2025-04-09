@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: MIT
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+
 pragma solidity ^0.8.24;
 
 library Address {
@@ -118,16 +121,6 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address) {
-        return msg.sender;
-    }
-
-    function _msgData() internal view virtual returns (bytes calldata) {
-        return msg.data;
-    }
-}
-
 abstract contract Ownable is Context {
     address private _owner;
 
@@ -176,7 +169,7 @@ abstract contract Ownable is Context {
     }
 }
 
-contract DreamCraft is IERC20, Ownable {
+contract DreamCraft is IERC20, Ownable, ReentrancyGuard, Pausable {
     using Address for address;
     mapping (address => uint256) internal _balances;
     mapping (address => mapping (address => uint256)) internal _allowed;
@@ -220,7 +213,7 @@ contract DreamCraft is IERC20, Ownable {
     * @param to The address to transfer to.
     * @param value The amount to be transferred.
     */
-    function transfer(address to, uint256 value) external override returns (bool) {
+    function transfer(address to, uint256 value) external override nonReentrant whenNotPaused returns (bool) {
         // check for SC
         _transfer(msg.sender, to, value);
         return true;
@@ -235,7 +228,7 @@ contract DreamCraft is IERC20, Ownable {
      * @param spender The address which will spend the funds.
      * @param value The amount of tokens to be spent.
      */
-    function approve(address spender, uint256 value) external override returns (bool) {
+    function approve(address spender, uint256 value) external override whenNotPaused returns (bool) {
         require(spender != address(0), "cannot approve the 0 address");
 
         _allowed[msg.sender][spender] = value;
@@ -243,16 +236,14 @@ contract DreamCraft is IERC20, Ownable {
         return true;
     }
 
-    function transferFrom(address from, address to, uint256 value) external override returns (bool) {
-        if (launched == false && to == owner() && msg.sender == owner()) {
-            _transfer(from, to, value);
-            return true;
-        } else {    
-            _allowed[from][msg.sender] = _allowed[from][msg.sender] - value;
-            _transfer(from, to, value);
-            emit Approval(from, msg.sender, _allowed[from][msg.sender]);
-            return true;
-        }
+    function transferFrom(address from, address to, uint256 value) external override nonReentrant whenNotPaused returns (bool) {
+        uint256 currentAllowance = _allowed[from][msg.sender];
+        require(currentAllowance >= value, "ERC20: transfer amount exceeds allowance");
+        _allowed[from][msg.sender] = currentAllowance - value;
+        emit Approval(from, msg.sender, _allowed[from][msg.sender]);
+
+        _transfer(from, to, value);
+        return true;
     }
 
     function launch() virtual external onlyOwner {
@@ -260,7 +251,7 @@ contract DreamCraft is IERC20, Ownable {
         launched = true;
     }
 
-    function addSupply(address to, uint256 amount) external onlyOwner {
+    function addSupply(address to, uint256 amount) external onlyOwner whenNotPaused {
         require(to != address(0), "to can't be zero");
         totalSupply = totalSupply + amount;
         _balances[to] = _balances[to] + amount;
@@ -270,6 +261,7 @@ contract DreamCraft is IERC20, Ownable {
     function _transfer(address from, address to, uint256 value) private {
         require(to != address(0), "cannot be zero address");
         require(from != to, "you cannot transfer to yourself");
+        require(_balances[from] >= value, "insufficient balance");
         require(_transferAllowed(from, to), "This token is not launched and cannot be listed on dexes yet.");
         _balances[from] -= value;
         _balances[to] += value;
@@ -279,7 +271,14 @@ contract DreamCraft is IERC20, Ownable {
     function _transferAllowed(address from, address to) private view returns (bool) {
       if (launched) return true;
       if (from == owner() || to == owner()) return true;
-      if (from.isContract() || to.isContract()) return false;
-      return true;
+      return false;
+    }
+
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
     }
 }
