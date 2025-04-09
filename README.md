@@ -17,32 +17,34 @@ DreamCraft is a revolutionary blockchain-powered platform designed to empower di
 ---
 
 ## 🧩 System Architecture Overview
-           +------------------------+
-           |   Frontend (React)     |
-           |  - Creator Dashboard   |
-           |  - Wallet Integration  |
-           +-----------+------------+
-                       |
-                       v
-         +-------------+--------------+
-         |   Backend API Gateway      |
-         | (Node.js + GraphQL/REST)   |
-         +-------------+--------------+
-                       |
-                       v
- +---------------------+--------------------------+
- |             Blockchain Layer (EVM Compatible)  |
- | - Smart Contracts (Solidity)                   |
- | - ERC-20/721 Token Standards                   |
- | - Governance & Reward Contracts                |
- +---------------------+--------------------------+
-                       |
-                       v
- +---------------------+--------------------------+
- | Decentralized Storage (IPFS / Filecoin)        |
- | - Content Hashing & Linking                    |
- | - Immutable, Censorship-resistant Files        |
- +------------------------------------------------+
+<pre>
+                   +-------------------------------+
+                   |      Frontend (React)        |
+                   |  - Creator Dashboard         |
+                   |  - Wallet Integration        |
+                   +---------------+--------------+
+                                   |
+                                   v
+                   +---------------+--------------+
+                   |    Backend API Gateway       |
+                   |  (Node.js + GraphQL/REST)    |
+                   +---------------+--------------+
+                                   |
+                                   v
+          +------------------------+-------------------------+
+          |     Blockchain Layer (EVM Compatible)            |
+          |  - Smart Contracts (Solidity)                    |
+          |  - ERC-20 / ERC-721 Token Standards              |
+          |  - Governance & Reward Distribution Contracts    |
+          +------------------------+-------------------------+
+                                   |
+                                   v
+          +------------------------+-------------------------+
+          |   Decentralized Storage (IPFS / Filecoin)        |
+          |  - Content Hashing & Linking                     |
+          |  - Immutable, Censorship-Resistant File Storage  |
+          +--------------------------------------------------+
+</pre>
 
  ---
 
@@ -93,3 +95,9 @@ DreamCraft is a revolutionary blockchain-powered platform designed to empower di
 | Wallet Support     | MetaMask, WalletConnect            |
 
 ---
+
+## 🌐 Official Links
+
+- [Website](https://dreamcraftai.xyz/)
+- [Whitepaper](https://wp.dreamcraftai.xyz/)
+- [Community](https://t.me/DreamCraftPRO)
